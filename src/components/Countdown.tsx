@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import styles from '../styles/components/Countdown.module.css'
 
+let countdownTimeout:NodeJS.Timeout;
+
 export function Countdown(){
 
-    const [time, setTime] = useState(25 * 60);
-    const [active, setActive] = useState(false);
+    const [time, setTime] = useState(0.1 * 60);
+    const [isActive, setIsActive] = useState(false);
+    const [hasFinished, setHasFinished] =  useState(false)
 
     const minutes = Math.floor(time / 60);
 
@@ -15,18 +18,32 @@ export function Countdown(){
 
     function startCountdown(){
 
-        setActive(true);
+        setIsActive(true);
     }
 
-    useEffect(() => {
-        if(active && time > 0){
+   function resetCountdown(){
 
-            setTimeout(() => {
+    clearTimeout(countdownTimeout);
+
+    setIsActive(false);
+
+    setTime( 0.1 * 60);
+
+   } 
+
+    useEffect(() => {
+        if(isActive && time > 0){
+
+           countdownTimeout = setTimeout(() => {
 
                 setTime(time -1 );
             }, 1000)
+        } else if (isActive && time == 0){
+
+            setHasFinished(true);
+            setIsActive(false);
         }
-    }, [active, time])
+    }, [isActive, time])
 
 
     return (
@@ -45,11 +62,34 @@ export function Countdown(){
             
         </div>
 
-        <button type="button" 
-        className={styles.countdownButton}
-        onClick={startCountdown}>
-            Iniciar Pomodoro
-        </button>
+        {hasFinished ? (
+              <button 
+              disabled
+              className={`${styles.countdownButton}`}>
+                 Ciclo Encerrado
+              </button>
+        ): (
+            <>
+             {isActive ? (
+
+                <button type="button" 
+                className={`${styles.countdownButton} ${styles.countdownButtonActive}`}
+                onClick={resetCountdown}>
+                Abandonar Ciclo
+                </button>
+
+                ) : (
+
+                    <button type="button" 
+                    className={styles.countdownButton}
+                    onClick={startCountdown}>
+                        Iniciar Pomodoro
+                    </button>
+
+) }
+            </>
+        )}
+
 
         </div>
 
